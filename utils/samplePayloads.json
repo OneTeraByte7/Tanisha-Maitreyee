@@ -1,0 +1,81 @@
+{
+  "registerDevice": {
+    "event": "register",
+    "payload": {
+      "deviceId": "device_android_001",
+      "isBaseStation": false
+    }
+  },
+
+  "registerBaseStation": {
+    "event": "register",
+    "payload": {
+      "deviceId": "base_station_A",
+      "isBaseStation": true,
+      "knownPosition": { "x": 0, "y": 0, "z": 0 }
+    }
+  },
+
+  "sensorUpdate": {
+    "event": "sensor_update",
+    "payload": {
+      "deviceId": "device_android_001",
+      "dt": 0.1,
+      "speed": 1.2,
+      "sensors": {
+        "accel": { "x": 0.12, "y": -0.05, "z": 9.81 },
+        "gyro":  { "x": 0.01, "y": -0.02, "z": 0.003 },
+        "mag":   { "x": 22.5, "y": -4.1,  "z": 43.2 }
+      },
+      "gps": {
+        "lat": 28.6139,
+        "lng": 77.2090,
+        "alt": 220
+      },
+      "rssiReadings": [
+        { "deviceId": "base_station_A", "rssi": -55 },
+        { "deviceId": "base_station_B", "rssi": -70 },
+        { "deviceId": "base_station_C", "rssi": -80 }
+      ]
+    }
+  },
+
+  "joinMonitors": {
+    "event": "join_monitors",
+    "payload": {}
+  },
+
+  "registerBaseStationB": {
+    "event": "register",
+    "payload": {
+      "deviceId": "base_station_B",
+      "isBaseStation": true,
+      "knownPosition": { "x": 10, "y": 0, "z": 0 }
+    }
+  },
+
+  "registerBaseStationC": {
+    "event": "register",
+    "payload": {
+      "deviceId": "base_station_C",
+      "isBaseStation": true,
+      "knownPosition": { "x": 5, "y": 8, "z": 0 }
+    }
+  },
+
+  "sensorUpdateDevice2": {
+    "event": "sensor_update",
+    "payload": {
+      "deviceId": "device_android_002",
+      "dt": 0.1,
+      "speed": 0.8,
+      "sensors": {
+        "accel": { "x": -0.05, "y": 0.10, "z": 9.78 },
+        "gyro":  { "x": 0.005, "y": 0.01, "z": -0.002 },
+        "mag":   { "x": 21.0, "y": -3.5, "z": 44.1 }
+      },
+      "gps": null,
+      "rssiReadings": []
+    }
+  }
+}
