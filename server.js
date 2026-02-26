@@ -35,8 +35,10 @@ app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime
 initRealtimeSocket(io);
 
 // ── Start ─────────────────────────────────────────────────────────────────────
-httpServer.listen(PORT, () => {
-  console.log(`🚀 Navigation backend running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  httpServer.listen(PORT, () => {
+    console.log(`🚀 Navigation backend running on http://localhost:${PORT}`);
+  });
+}
 
-module.exports = { app, io };
+module.exports = { app, io, httpServer };

@@ -20,13 +20,31 @@
  */
 
 const config = require('../config/config');
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const INFO_PATH = path.join(DATA_DIR, 'info.json');
 
 class DeviceStore {
   constructor() {
     this.devices = new Map();  // deviceId => deviceState
 
-    // Periodically prune stale devices
-    setInterval(() => this._pruneStaleDevices(), 10000);
+    // Ensure data directory exists
+    try {
+      if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    } catch (err) {
+      console.error('Failed to ensure data directory:', err);
+    }
+
+    // Load persisted devices if available
+    this._loadFromDisk();
+
+    // Periodically prune stale devices and persist state
+    setInterval(() => {
+      this._pruneStaleDevices();
+      this._saveToDisk();
+    }, 10000);
   }
 
   /** Upsert device state */
@@ -39,6 +57,7 @@ class DeviceStore {
       lastUpdated: Date.now()
     };
     this.devices.set(deviceId, updated);
+    this._saveToDisk();
     return updated;
   }
 
@@ -64,6 +83,7 @@ class DeviceStore {
 
   remove(deviceId) {
     this.devices.delete(deviceId);
+    this._saveToDisk();
   }
 
   _pruneStaleDevices() {
@@ -88,6 +108,38 @@ class DeviceStore {
         lastUpdated: d.lastUpdated
       }))
     };
+  }
+
+  /** Persist current devices map to disk (atomic write) */
+  _saveToDisk() {
+    try {
+      const data = { generatedAt: Date.now(), devices: this.getAll() };
+      const tmp = INFO_PATH + '.tmp';
+      fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8');
+      fs.renameSync(tmp, INFO_PATH);
+    } catch (err) {
+      console.error('Failed to save device info to disk:', err);
+    }
+  }
+
+  /** Load devices from disk if file exists */
+  _loadFromDisk() {
+    try {
+      if (!fs.existsSync(INFO_PATH)) return;
+      const raw = fs.readFileSync(INFO_PATH, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.devices)) {
+        for (const d of parsed.devices) {
+          // Refresh lastUpdated to now to avoid immediate pruning on startup
+          const restored = { ...d, lastUpdated: Date.now() };
+          this.devices.set(restored.deviceId, restored);
+        }
+        // Persist refreshed timestamps back to disk so subsequent restarts keep them fresh
+        this._saveToDisk();
+      }
+    } catch (err) {
+      console.error('Failed to load device info from disk:', err);
+    }
   }
 }
 

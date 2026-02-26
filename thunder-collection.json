@@ -1,0 +1,133 @@
+{
+  "_type": "collection",
+  "name": "Autonomous Navigation API",
+  "version": "1.0",
+  "requests": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/health"
+      }
+    },
+    {
+      "name": "Landing",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/landing"
+      }
+    },
+    {
+      "name": "Get external navigation",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/navigation/external"
+      }
+    },
+    {
+      "name": "Get internal navigation",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/navigation/internal"
+      }
+    },
+    {
+      "name": "Register base station A",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:3000/navigation/register",
+        "body": {
+          "mode": "raw",
+          "raw": { "deviceId": "base_station_A", "isBaseStation": true, "knownPosition": { "x": 0, "y": 0 } }
+        }
+      }
+    },
+    {
+      "name": "Register base station B",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:3000/navigation/register",
+        "body": {
+          "mode": "raw",
+          "raw": { "deviceId": "base_station_B", "isBaseStation": true, "knownPosition": { "x": 10, "y": 0 } }
+        }
+      }
+    },
+    {
+      "name": "Register base station C",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:3000/navigation/register",
+        "body": {
+          "mode": "raw",
+          "raw": { "deviceId": "base_station_C", "isBaseStation": true, "knownPosition": { "x": 5, "y": 8 } }
+        }
+      }
+    },
+    {
+      "name": "Register mobile device 001",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:3000/navigation/register",
+        "body": {
+          "mode": "raw",
+          "raw": { "deviceId": "device_android_001", "isBaseStation": false }
+        }
+      }
+    },
+    {
+      "name": "Sensor update device 001 (GPS + RSSI)",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:3000/navigation/external/update",
+        "body": {
+          "mode": "raw",
+          "raw": {
+            "deviceId": "device_android_001",
+            "gps": { "lat": 28.6139, "lng": 77.2090, "alt": 220 },
+            "speed": 1.2,
+            "heading": 45,
+            "rssiReadings": [ { "deviceId": "base_station_A", "rssi": -55 }, { "deviceId": "base_station_B", "rssi": -70 }, { "deviceId": "base_station_C", "rssi": -80 } ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Sensor update device 002 (no GPS)",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:3000/navigation/external/update",
+        "body": {
+          "mode": "raw",
+          "raw": {
+            "deviceId": "device_android_002",
+            "gps": null,
+            "speed": 0.8,
+            "heading": 90
+          }
+        }
+      }
+    },
+    {
+      "name": "Get devices",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/dashboard/devices"
+      }
+    },
+    {
+      "name": "Get dashboard",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/dashboard"
+      }
+    },
+    {
+      "name": "Get proximity events",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/navigation/proximity"
+      }
+    }
+  ]
+}

@@ -4,10 +4,8 @@
  * Also handles indoor trilateration from RSSI beacons.
  */
 
-const { RSSI_REF_POWER, PATH_LOSS_EXPONENT, DEVICE_TTL_MS } = require('../config/app.config');
-
-// ── In-memory device map: deviceId -> DeviceState ────────────────────────────
-const deviceMap = new Map();
+const config = require('../config/config');
+const deviceStore = require('../models/deviceStore');
 
 /**
  * DeviceState shape:
@@ -60,7 +58,9 @@ function deadReckon(lat, lng, heading, speedMps, dtMs) {
  * @returns {number} estimated distance in meters
  */
 function rssiToDistance(rssi) {
-  return Math.pow(10, (RSSI_REF_POWER - rssi) / (10 * PATH_LOSS_EXPONENT));
+  const ref = config.INDOOR?.RSSI_MEASURED_AT_1M ?? -40;
+  const n = config.INDOOR?.RSSI_PATH_LOSS_EXPONENT ?? 2.0;
+  return Math.pow(10, (ref - rssi) / (10 * n));
 }
 
 /**
@@ -104,7 +104,7 @@ function trilaterate(beacons) {
  */
 function updateDevicePosition(deviceId, payload, fusedState) {
   const now = Date.now();
-  const existing = deviceMap.get(deviceId);
+  const existing = deviceStore.get(deviceId) || {};
 
   let lat = existing?.lat ?? payload.gps?.lat ?? 0;
   let lng = existing?.lng ?? payload.gps?.lng ?? 0;
@@ -144,8 +144,9 @@ function updateDevicePosition(deviceId, payload, fusedState) {
     indoorPosition,
   };
 
-  deviceMap.set(deviceId, state);
-  return state;
+  // Persist via deviceStore (this will also save to disk)
+  const persisted = deviceStore.update(deviceId, state);
+  return persisted;
 }
 
 /**
@@ -153,23 +154,18 @@ function updateDevicePosition(deviceId, payload, fusedState) {
  * @returns {Array<DeviceState>}
  */
 function getActiveDevices() {
-  const now = Date.now();
-  for (const [id, state] of deviceMap) {
-    if (now - state.lastUpdate > DEVICE_TTL_MS) {
-      deviceMap.delete(id);
-    }
-  }
-  return Array.from(deviceMap.values());
+  // deviceStore handles pruning; return all active devices
+  return deviceStore.getAll();
 }
 
 /** Get a single device state by ID */
 function getDevice(deviceId) {
-  return deviceMap.get(deviceId) || null;
+  return deviceStore.get(deviceId) || null;
 }
 
 /** Remove a device from the map */
 function removeDevice(deviceId) {
-  deviceMap.delete(deviceId);
+  deviceStore.remove(deviceId);
 }
 
 /** Euclidean distance between two devices in meters (uses lat/lng Haversine) */
